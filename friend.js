@@ -34,6 +34,8 @@ class DesktopFriend {
     this.bubbleTimer = null;
     this.clickTimer = null;
     this.clickCount = 0;
+    this.imageCanvas = null;
+    this.imageCanvasCtx = null;
   }
 
   init() {
@@ -53,6 +55,66 @@ class DesktopFriend {
     this.setImageSource(this.config.imageSrc);
   }
 
+  // 检测点击位置是否在图片的非透明区域
+  isClickOnImage(e) {
+    // 如果是 emoji fallback，直接返回 true
+    if (this.friendImage.style.display === "none") {
+      return true;
+    }
+
+    // 如果图片还未加载完成，返回 true（允许点击）
+    if (!this.imageCanvas || !this.friendImage.complete) {
+      return true;
+    }
+
+    // 获取点击位置相对于图片的坐标
+    const rect = this.friendImage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // 坐标超出图片范围
+    if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) {
+      return false;
+    }
+
+    // 获取 canvas 上对应位置的像素数据
+    const scaleX = this.imageCanvas.width / rect.width;
+    const scaleY = this.imageCanvas.height / rect.height;
+    const canvasX = Math.floor(x * scaleX);
+    const canvasY = Math.floor(y * scaleY);
+
+    try {
+      const pixel = this.imageCanvasCtx.getImageData(canvasX, canvasY, 1, 1).data;
+      const alpha = pixel[3]; // Alpha 通道值 (0-255)
+      
+      // 透明度大于 30 认为是有效区域
+      return alpha > 30;
+    } catch (err) {
+      // 如果获取像素失败，允许点击
+      return true;
+    }
+  }
+
+  // 创建图片的 canvas 副本用于透明度检测
+  createImageCanvas() {
+    if (!this.friendImage.complete || this.friendImage.naturalWidth === 0) {
+      return;
+    }
+
+    this.imageCanvas = document.createElement("canvas");
+    this.imageCanvas.width = this.friendImage.naturalWidth;
+    this.imageCanvas.height = this.friendImage.naturalHeight;
+    this.imageCanvasCtx = this.imageCanvas.getContext("2d");
+    
+    try {
+      this.imageCanvasCtx.drawImage(this.friendImage, 0, 0);
+    } catch (err) {
+      console.warn("无法创建图片 canvas:", err);
+      this.imageCanvas = null;
+      this.imageCanvasCtx = null;
+    }
+  }
+
   bindEvents() {
     const stopNativeDrag = (e) => e.preventDefault();
     this.friendWrap.addEventListener("dragstart", stopNativeDrag);
@@ -62,6 +124,12 @@ class DesktopFriend {
 
     this.friendWrap.addEventListener("mousedown", (e) => {
       if (e.button !== 0) return;
+      
+      // 检查是否点击在图片的非透明区域
+      if (!this.isClickOnImage(e)) {
+        return;
+      }
+      
       e.preventDefault();
 
       this.isDragging = true;
@@ -86,7 +154,12 @@ class DesktopFriend {
       ipcRenderer.send("friend-drag-move");
     });
 
-    this.friendWrap.addEventListener("click", () => {
+    this.friendWrap.addEventListener("click", (e) => {
+      // 检查是否点击在图片的非透明区域
+      if (!this.isClickOnImage(e)) {
+        return;
+      }
+      
       this.clickCount++;
       
       if (this.clickTimer) {
@@ -168,6 +241,9 @@ class DesktopFriend {
     this.friendImage.onload = () => {
       this.friendImage.style.display = "block";
       this.friendFallback.style.display = "none";
+      
+      // 图片加载完成后创建 canvas 用于透明度检测
+      this.createImageCanvas();
     };
 
     this.friendImage.src = src;
