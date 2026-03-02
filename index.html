@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  :root {
+    --friend-bubble-bg: rgba(255, 255, 255, 0.92);
+    --friend-bubble-text: #333;
+    --friend-name-color: #fff;
+    --friend-shadow: rgba(0, 0, 0, 0.15);
+  }
+
+  body {
+    margin: 0;
+    background: transparent;
+    overflow: hidden;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  }
+
+  #friend-wrap {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  #friend-wrap * {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  #friend-bubble {
+    position: relative;
+    max-width: 160px;
+    min-height: 28px;
+    padding: 8px 10px;
+    border-radius: 14px;
+    background: var(--friend-bubble-bg);
+    color: var(--friend-bubble-text);
+    font-size: 13px;
+    line-height: 1.35;
+    box-shadow: 0 4px 12px var(--friend-shadow);
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+  }
+
+  #friend-bubble.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #friend-bubble::after {
+    content: "";
+    position: absolute;
+    left: 18px;
+    bottom: -8px;
+    border: 8px solid transparent;
+    border-top-color: var(--friend-bubble-bg);
+  }
+
+  #chat-input-wrap {
+    position: relative;
+    max-width: 200px;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    display: none;
+  }
+
+  #chat-input-wrap.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    display: block;
+  }
+
+  #chat-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 14px;
+    background: var(--friend-bubble-bg);
+    color: var(--friend-bubble-text);
+    font-size: 13px;
+    line-height: 1.35;
+    box-shadow: 0 4px 12px var(--friend-shadow);
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  #chat-input::placeholder {
+    color: #999;
+  }
+
+  #friend {
+    width: 256px;
+    margin: 0 auto;
+    line-height: 1;
+    text-align: center;
+  }
+
+  #friend-image {
+    width: 256px;
+    height: 256px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+    transform-origin: center bottom;
+    pointer-events: none;
+  }
+
+  #friend-image.activity-idle {
+    animation: friend-float 2.2s ease-in-out infinite;
+  }
+
+  #friend-image.activity-talk {
+    animation: friend-talk 0.35s ease-in-out 6;
+  }
+
+  #friend-fallback {
+    display: none;
+    font-size: 126px;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  #friend-name {
+    margin-top: 4px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--friend-name-color);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+  }
+
+  @keyframes friend-float {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  @keyframes friend-talk {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(0) scale(1.04); }
+    100% { transform: translateY(0) scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<div id="friend-wrap">
+  <div id="friend-bubble"></div>
+  <div id="chat-input-wrap">
+    <input id="chat-input" type="text" placeholder="和Lucy聊天..." />
+  </div>
+  <div id="friend">
+    <img id="friend-image" alt="Lucy" draggable="false" />
+    <div id="friend-fallback">👧</div>
+  </div>
+</div>
+
+<script src="./friend.js"></script>
+</body>
+</html>

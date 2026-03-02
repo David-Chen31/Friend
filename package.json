@@ -1,0 +1,34 @@
+{
+  "name": "lucy",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "test-ai": "node test-ai.js"
+  },
+  "build": {
+    "appId": "com.friend.lucy",
+    "productName": "好朋友Lucy",
+    "win": {
+      "target": "portable",
+      "icon": "assets/lucy.png",
+      "sign": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "portable": {
+      "artifactName": "好朋友Lucy便携版.exe"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "桌面好朋友Lucy",
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}
